@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  20 JUN 2026 13:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  20 JUN 2026 22:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**tee_qai_edge_architecture.tex
-(./tee_qai_edge_architecture.tex
+**tee_qai_edge_architecture_visual.tex
+(./tee_qai_edge_architecture_visual.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
 (/usr/local/texlive/2026/texmf-dist/tex/latex/standalone/standalone.cls
@@ -411,14 +411,6 @@ LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 (Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 38.
 )
-(/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
-s/tikzlibrarypositioning.code.tex
-File: tikzlibrarypositioning.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-)
-(/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
-s/tikzlibraryfit.code.tex
-File: tikzlibraryfit.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-)
 (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.
 meta.code.tex
 File: pgflibraryarrows.meta.code.tex 2025-08-29 v3.1.11a (3.1.11a)
@@ -432,12 +424,10 @@ s/tikzlibrarycalc.code.tex
 File: tikzlibrarycalc.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 )
 (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
-s/tikzlibrarybackgrounds.code.tex
-File: tikzlibrarybackgrounds.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@layerbox@background=\box65
-\pgf@layerboxsaved@background=\box66
+s/tikzlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 )
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 39
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 27
 .
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/lm/t1lmr.fd
@@ -447,29 +437,28 @@ File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count307
 )
-(./tee_qai_edge_architecture.aux)
-\openout1 = `tee_qai_edge_architecture.aux'.
+No file tee_qai_edge_architecture_visual.aux.
+\openout1 = `tee_qai_edge_architecture_visual.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
 (/usr/local/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count308
 \scratchdimen=\dimen261
-\scratchbox=\box67
+\scratchbox=\box65
 \nofMPsegments=\count309
 \nofMParguments=\count310
 \everyMPshowfont=\toks32
@@ -487,41 +476,188 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Font Info:    Trying to load font information for T1+lmss on input line 5
-0.
+<icons/database.png, id=4, 128.48pt x 128.48pt>
+File: icons/database.png Graphic file (type png)
+<use icons/database.png>
+Package pdftex.def Info: icons/database.png  used on input line 45.
+(pdftex.def)             Requested size: 15.6491pt x 15.64825pt.
+<icons/pytorch.png, id=6, 128.48pt x 128.48pt>
+File: icons/pytorch.png Graphic file (type png)
+<use icons/pytorch.png>
+Package pdftex.def Info: icons/pytorch.png  used on input line 46.
+(pdftex.def)             Requested size: 15.6491pt x 15.64825pt.
+<icons/qiskit.png, id=7, 128.48pt x 128.48pt>
+File: icons/qiskit.png Graphic file (type png)
+<use icons/qiskit.png>
+Package pdftex.def Info: icons/qiskit.png  used on input line 47.
+(pdftex.def)             Requested size: 15.6491pt x 15.64825pt.
+<icons/pennylane.png, id=8, 128.48pt x 128.48pt>
+File: icons/pennylane.png Graphic file (type png)
+<use icons/pennylane.png>
+Package pdftex.def Info: icons/pennylane.png  used on input line 48.
+(pdftex.def)             Requested size: 15.6491pt x 15.64825pt.
+<icons/compress.png, id=9, 128.48pt x 128.48pt>
+File: icons/compress.png Graphic file (type png)
+<use icons/compress.png>
+Package pdftex.def Info: icons/compress.png  used on input line 49.
+(pdftex.def)             Requested size: 15.6491pt x 15.64825pt.
+<icons/lock.png, id=10, 128.48pt x 128.48pt>
+File: icons/lock.png Graphic file (type png)
+<use icons/lock.png>
+Package pdftex.def Info: icons/lock.png  used on input line 50.
+(pdftex.def)             Requested size: 15.6491pt x 15.64825pt.
+<icons/sensor.png, id=11, 128.48pt x 128.48pt>
+File: icons/sensor.png Graphic file (type png)
+<use icons/sensor.png>
+Package pdftex.def Info: icons/sensor.png  used on input line 56.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/iot.png, id=12, 128.48pt x 128.48pt>
+File: icons/iot.png Graphic file (type png)
+<use icons/iot.png>
+Package pdftex.def Info: icons/iot.png  used on input line 57.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+File: icons/sensor.png Graphic file (type png)
+<use icons/sensor.png>
+Package pdftex.def Info: icons/sensor.png  used on input line 58.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+File: icons/iot.png Graphic file (type png)
+<use icons/iot.png>
+Package pdftex.def Info: icons/iot.png  used on input line 59.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/collect.png, id=13, 128.48pt x 128.48pt>
+File: icons/collect.png Graphic file (type png)
+<use icons/collect.png>
+Package pdftex.def Info: icons/collect.png  used on input line 60.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/feature.png, id=14, 128.48pt x 128.48pt>
+File: icons/feature.png Graphic file (type png)
+<use icons/feature.png>
+Package pdftex.def Info: icons/feature.png  used on input line 61.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/bench.png, id=15, 128.48pt x 128.48pt>
+File: icons/bench.png Graphic file (type png)
+<use icons/bench.png>
+Package pdftex.def Info: icons/bench.png  used on input line 62.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/linux.png, id=16, 128.48pt x 128.48pt>
+File: icons/linux.png Graphic file (type png)
+<use icons/linux.png>
+Package pdftex.def Info: icons/linux.png  used on input line 63.
+(pdftex.def)             Requested size: 13.6572pt x 13.65645pt.
+<icons/network.png, id=17, 128.48pt x 128.48pt>
+File: icons/network.png Graphic file (type png)
+<use icons/network.png>
+Package pdftex.def Info: icons/network.png  used on input line 64.
+(pdftex.def)             Requested size: 13.6572pt x 13.65645pt.
+<icons/management.png, id=18, 128.48pt x 128.48pt>
+File: icons/management.png Graphic file (type png)
+<use icons/management.png>
+Package pdftex.def Info: icons/management.png  used on input line 65.
+(pdftex.def)             Requested size: 13.6572pt x 13.65645pt.
+<icons/tee_api.png, id=19, 128.48pt x 128.48pt>
+File: icons/tee_api.png Graphic file (type png)
+<use icons/tee_api.png>
+Package pdftex.def Info: icons/tee_api.png  used on input line 66.
+(pdftex.def)             Requested size: 13.6572pt x 13.65645pt.
+<icons/key.png, id=20, 128.48pt x 128.48pt>
+File: icons/key.png Graphic file (type png)
+<use icons/key.png>
+Package pdftex.def Info: icons/key.png  used on input line 67.
+(pdftex.def)             Requested size: 13.08846pt x 13.08792pt.
+<icons/model.png, id=21, 128.48pt x 128.48pt>
+File: icons/model.png Graphic file (type png)
+<use icons/model.png>
+Package pdftex.def Info: icons/model.png  used on input line 68.
+(pdftex.def)             Requested size: 13.08846pt x 13.08792pt.
+<icons/inference.png, id=22, 128.48pt x 128.48pt>
+File: icons/inference.png Graphic file (type png)
+<use icons/inference.png>
+Package pdftex.def Info: icons/inference.png  used on input line 69.
+(pdftex.def)             Requested size: 13.08846pt x 13.08792pt.
+<icons/hybrid.png, id=23, 128.48pt x 128.48pt>
+File: icons/hybrid.png Graphic file (type png)
+<use icons/hybrid.png>
+Package pdftex.def Info: icons/hybrid.png  used on input line 70.
+(pdftex.def)             Requested size: 13.08846pt x 13.08792pt.
+<icons/attest.png, id=24, 128.48pt x 128.48pt>
+File: icons/attest.png Graphic file (type png)
+<use icons/attest.png>
+Package pdftex.def Info: icons/attest.png  used on input line 71.
+(pdftex.def)             Requested size: 13.08846pt x 13.08792pt.
+<icons/decision.png, id=25, 128.48pt x 128.48pt>
+File: icons/decision.png Graphic file (type png)
+<use icons/decision.png>
+Package pdftex.def Info: icons/decision.png  used on input line 72.
+(pdftex.def)             Requested size: 13.08846pt x 13.08792pt.
+<icons/fpga.png, id=26, 128.48pt x 128.48pt>
+File: icons/fpga.png Graphic file (type png)
+<use icons/fpga.png>
+Package pdftex.def Info: icons/fpga.png  used on input line 73.
+(pdftex.def)             Requested size: 13.08846pt x 13.08792pt.
+<icons/verify.png, id=27, 128.48pt x 128.48pt>
+File: icons/verify.png Graphic file (type png)
+<use icons/verify.png>
+Package pdftex.def Info: icons/verify.png  used on input line 74.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/fleet.png, id=28, 128.48pt x 128.48pt>
+File: icons/fleet.png Graphic file (type png)
+<use icons/fleet.png>
+Package pdftex.def Info: icons/fleet.png  used on input line 75.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/policy.png, id=29, 128.48pt x 128.48pt>
+File: icons/policy.png Graphic file (type png)
+<use icons/policy.png>
+Package pdftex.def Info: icons/policy.png  used on input line 76.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+<icons/monitor.png, id=30, 128.48pt x 128.48pt>
+File: icons/monitor.png Graphic file (type png)
+<use icons/monitor.png>
+Package pdftex.def Info: icons/monitor.png  used on input line 77.
+(pdftex.def)             Requested size: 14.79555pt x 14.79547pt.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 9
+9.
 
-(/usr/local/texlive/2026/texmf-dist/tex/latex/lm/t1lmss.fd
-File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+(/usr/local/texlive/2026/texmf-dist/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [1
 
 
 Non-PDF special ignored!
-<special> papersize=757.10901pt,337.81195pt
+<special> papersize=675.10931pt,331.37056pt
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/loc
-al/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}]
-(./tee_qai_edge_architecture.aux)
+al/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/202
+6/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc} <./icons/database.png> <./icons/pyt
+orch.png> <./icons/qiskit.png> <./icons/pennylane.png> <./icons/compress.png> <
+./icons/lock.png> <./icons/sensor.png> <./icons/iot.png> <./icons/collect.png> 
+<./icons/feature.png> <./icons/bench.png> <./icons/linux.png> <./icons/network.
+png> <./icons/management.png> <./icons/tee_api.png> <./icons/key.png> <./icons/
+model.png> <./icons/inference.png> <./icons/hybrid.png> <./icons/attest.png> <.
+/icons/decision.png> <./icons/fpga.png> <./icons/verify.png> <./icons/fleet.png
+> <./icons/policy.png> <./icons/monitor.png>]
+(./tee_qai_edge_architecture_visual.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 13551 strings out of 467525
- 283129 string characters out of 5418982
- 726305 words of memory out of 5000000
- 42233 multiletter control sequences out of 15000+600000
- 649203 words of font info for 48 fonts, out of 8000000 for 9000
+ 13564 strings out of 467525
+ 283293 string characters out of 5418982
+ 703132 words of memory out of 5000000
+ 42251 multiletter control sequences out of 15000+600000
+ 652797 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 117i,7n,121p,434b,1143s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2026/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/lo
+ 117i,8n,121p,441b,707s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2026/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/lo
 cal/texlive/2026/texmf-dist/fonts/type1/public/lm/lmbx7.pfb></usr/local/texlive
-/2026/texmf-dist/fonts/type1/public/lm/lmr5.pfb></usr/local/texlive/2026/texmf-
-dist/fonts/type1/public/lm/lmr7.pfb></usr/local/texlive/2026/texmf-dist/fonts/t
-ype1/public/lm/lmr9.pfb>
-Output written on tee_qai_edge_architecture.pdf (1 page, 151978 bytes).
+/2026/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></usr/local/texlive/2026/texmf
+-dist/fonts/type1/public/lm/lmr5.pfb></usr/local/texlive/2026/texmf-dist/fonts/
+type1/public/lm/lmr7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public
+/lm/lmr9.pfb>
+Output written on tee_qai_edge_architecture_visual.pdf (1 page, 201609 bytes).
 PDF statistics:
- 37 PDF objects out of 1000 (max. 8388607)
- 23 compressed objects within 1 object stream
+ 99 PDF objects out of 1000 (max. 8388607)
+ 30 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 13 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 143 words of extra memory for PDF output out of 10000 (max. 10000000)
 

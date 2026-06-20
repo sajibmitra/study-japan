@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import math
 from pathlib import Path
 
@@ -17,6 +18,92 @@ ICON_DIR = ROOT / "icons"
 OUT_PNG = ROOT / "tee_qai_edge_architecture_visual.png"
 OUT_PDF = ROOT / "tee_qai_edge_architecture_visual.pdf"
 OUT_SVG = ROOT / "tee_qai_edge_architecture_visual.svg"
+OUT_TEX = ROOT / "tee_qai_edge_architecture_visual.tex"
+
+FIG_W = 18.0  # cm — matches matplotlib figsize width
+FIG_H = 11.0  # cm — matches matplotlib figsize height
+
+TITLE = "Trustworthy Hybrid Quantum–Classical AI for Secure IoT Edge Systems"
+SUBTITLE = (
+    "System Architecture — TEE-protected deployment, trusted inference, "
+    "and hybrid anomaly detection"
+)
+
+ZONES = [
+    {"xy": (0.03, 0.82), "w": 0.94, "h": 0.11, "fill": "#FFE0B2", "title": "Development & Training (offline)"},
+    {"xy": (0.03, 0.69), "w": 0.94, "h": 0.10, "fill": "#C8E6C9", "title": "IoT Layer"},
+    {"xy": (0.03, 0.57), "w": 0.94, "h": 0.10, "fill": "#ECEFF1", "title": "Edge Data Path"},
+    {"xy": (0.03, 0.41), "w": 0.44, "h": 0.13, "fill": "#FFCDD2", "title": "REE — Linux OS (untrusted)"},
+    {"xy": (0.50, 0.36), "w": 0.47, "h": 0.18, "fill": "#BBDEFB", "title": "TEE — OP-TEE / ARM TrustZone (protected)"},
+    {"xy": (0.03, 0.16), "w": 0.94, "h": 0.12, "fill": "#B3E5FC", "title": "Cloud Management & Monitoring"},
+]
+
+DEV_ITEMS = [
+    (0.08, "database", "Datasets"),
+    (0.22, "pytorch", "PyTorch"),
+    (0.36, "qiskit", "Qiskit"),
+    (0.50, "pennylane", "PennyLane"),
+    (0.64, "compress", "Compress"),
+    (0.78, "lock", "Sign & Encrypt"),
+]
+DEV_Y = 0.865
+
+IOT_ITEMS = [
+    (0.14, "sensor", "Sensors"),
+    (0.32, "iot", "Actuators"),
+    (0.50, "sensor", "ESP32 nodes"),
+    (0.72, "iot", "Field Gateway"),
+]
+IOT_Y = 0.735
+
+DATA_ITEMS = [
+    (0.22, "collect", "Data Collection"),
+    (0.46, "feature", "Feature Extraction (REE)"),
+    (0.70, "bench", "Benchmark Harness"),
+]
+DATA_Y = 0.615
+
+REE_ITEMS = [
+    (0.10, "linux", "Linux"),
+    (0.22, "network", "Network"),
+    (0.34, "management", "Mgmt Agent"),
+    (0.46, "tee_api", "TEE Client API"),
+]
+REE_Y = 0.465
+
+TEE_ITEMS = [
+    (0.56, 0.505, "key", "Secure Keys"),
+    (0.68, 0.505, "model", "Model Store"),
+    (0.80, 0.505, "inference", "Inference TA"),
+    (0.92, 0.505, "hybrid", "Hybrid Q-C Engine"),
+    (0.62, 0.405, "attest", "Remote Attestation"),
+    (0.78, 0.405, "decision", "Security Decision"),
+    (0.90, 0.405, "fpga", "ARM / FPGA Runtime"),
+]
+
+ARROWS = [
+    # (x1, y1, x2, y2, color, style, label)
+    (0.50, 0.69, 0.50, 0.635, "#37474F", "-", "telemetry"),
+    (0.27, DATA_Y, 0.41, DATA_Y, "#37474F", "-", "streams"),
+    (0.51, DATA_Y, 0.65, DATA_Y, "#37474F", "-", "features"),
+    (0.46, REE_Y, 0.56, 0.505, "#1565C0", "-", "invoke TA"),
+    (0.65, 0.57, 0.80, 0.535, "#37474F", "-", "features"),
+    (0.78, 0.82, 0.68, 0.535, "#E65100", "--", "deploy model"),
+    (0.61, 0.505, 0.63, 0.505, "#1565C0", "-", None),
+    (0.73, 0.505, 0.75, 0.505, "#1565C0", "-", None),
+    (0.85, 0.505, 0.87, 0.505, "#1565C0", "-", None),
+    (0.92, 0.485, 0.78, 0.425, "#1565C0", "-", None),
+    (0.68, 0.485, 0.62, 0.425, "#1565C0", "-", None),
+    (0.78, 0.36, 0.14, 0.28, "#1565C0", "--", "attestation quote"),
+    (0.78, 0.36, 0.80, 0.28, "#37474F", "-", "alerts"),
+]
+
+NOTES = [
+    (0.03, 0.03, "#FFEBEE", "Threats mitigated:\nmodel tampering · replacement · extraction · unauthorized inference · compromised REE"),
+    (0.27, 0.03, "#E3F2FD", "TEE protects:\nmodel storage · inference · keys · decision logic"),
+    (0.51, 0.03, "#FFF8E1", "QAI role:\nanomaly engine inside TEE (not a security primitive)"),
+    (0.73, 0.03, "#E8F5E9", "RQ:\nHybrid Q-C vs TinyML for unseen attacks under deployability & TEE constraints"),
+]
 
 SIZE = 128
 
@@ -99,7 +186,7 @@ def icon_linux(d, s):
 
 def icon_network(d, s):
     d.ellipse([56, 18, 72, 34], fill="#1976D2")
-    for ang, xy in zip([210, 330, 90], [(24, 88), (104, 88), (64, 104)]):
+    for xy in [(24, 88), (104, 88), (64, 104)]:
         d.ellipse([xy[0] - 8, xy[1] - 8, xy[0] + 8, xy[1] + 8], fill="#42A5F5")
         d.line([(64, 26), xy], fill="#1565C0", width=3)
 
@@ -267,101 +354,193 @@ def arrow(ax, p1, p2, color="#37474F", style="-", lw=1.8, text=None, text_pos=0.
         ax.text(mx, my + 0.012, text, ha="center", va="bottom", fontsize=7.5, color=color, zorder=4)
 
 
-def build(icons: dict[str, Path]) -> None:
-    fig, ax = plt.subplots(figsize=(18, 11))
+def tex_escape(text: str) -> str:
+    repl = {
+        "\\": r"\textbackslash{}",
+        "&": r"\&",
+        "%": r"\%",
+        "$": r"\$",
+        "#": r"\#",
+        "_": r"\_",
+        "{": r"\{",
+        "}": r"\}",
+        "~": r"\textasciitilde{}",
+        "^": r"\textasciicircum{}",
+    }
+    out = text
+    for old, new in repl.items():
+        out = out.replace(old, new)
+    return out
+
+
+def export_tikz(icons: dict[str, Path], out_path: Path = OUT_TEX) -> Path:
+    """Write a standalone LaTeX file with a tikzpicture using icon images."""
+    _ = icons  # icons must exist on disk under icons/
+
+    lines: list[str] = [
+        "% Auto-generated by generate_architecture_visual.py --tex",
+        "% Compile: pdflatex tee_qai_edge_architecture_visual.tex",
+        r"\documentclass[tikz,border=10pt]{standalone}",
+        r"\usepackage[T1]{fontenc}",
+        r"\usepackage{lmodern}",
+        r"\usepackage{xcolor}",
+        r"\usepackage{graphicx}",
+        r"\usepackage{tikz}",
+        r"\usetikzlibrary{arrows.meta,calc,positioning}",
+        "",
+    ]
+    for i, zone in enumerate(ZONES):
+        html = zone["fill"].lstrip("#")
+        lines.append(rf"\definecolor{{zonefill{i}}}{{HTML}}{{{html}}}")
+
+    lines.extend([
+        "",
+        r"\tikzset{",
+        r"  arr/.style={-{Latex}, line width=0.7pt, draw=black!70},",
+        r"  trust/.style={-{Latex}, line width=0.75pt, draw=blue!60!black},",
+        r"  deploy/.style={-{Latex}, line width=0.7pt, draw=orange!70!black, dashed},",
+        r"  icon/.style={align=center, font=\scriptsize\bfseries},",
+        r"  zone/.style={draw=black!55, line width=0.8pt, rounded corners=3pt, opacity=0.35},",
+        r"  note/.style={draw=black!40, rounded corners=2pt, fill=white, align=left, font=\scriptsize, inner sep=4pt},",
+        r"}",
+        "",
+        r"\begin{document}",
+        rf"\begin{{tikzpicture}}[x={FIG_W:.1f}cm, y={FIG_H:.1f}cm]",
+        "",
+        rf"\node[font=\bfseries\large, align=center, text width=0.85\linewidth] at (0.5, 0.975) {{{tex_escape(TITLE)}}};",
+        rf"\node[font=\small, align=center, text=black!60, text width=0.9\linewidth] at (0.5, 0.948) {{{tex_escape(SUBTITLE)}}};",
+        "",
+    ])
+
+    for i, zone in enumerate(ZONES):
+        x, y = zone["xy"]
+        w, h = zone["w"], zone["h"]
+        x2, y2 = x + w, y + h
+        lines.append(
+            rf"\draw[zone, fill=zonefill{i}] ({x:.3f},{y:.3f}) rectangle ({x2:.3f},{y2:.3f});"
+        )
+        lines.append(
+            rf"\node[anchor=north west, font=\bfseries\small] at ({x + 0.012:.3f},{y2 - 0.018:.3f}) {{{tex_escape(zone['title'])}}};"
+        )
+
+    def icon_node(node_id: str, x: float, y: float, icon_key: str, label: str, width: str = "0.55cm") -> None:
+        icon_path = f"icons/{icon_key}.png"
+        lines.append(
+            rf"\node[icon] ({node_id}) at ({x:.3f},{y:.3f}) {{"
+            rf"\includegraphics[width={width}]{{{icon_path}}}\\[-2pt]{tex_escape(label)}}};"
+        )
+
+    for i, (x, key, lbl) in enumerate(DEV_ITEMS):
+        icon_node(f"dev{i}", x, DEV_Y, key, lbl)
+    for i in range(len(DEV_ITEMS) - 1):
+        x1 = DEV_ITEMS[i][0] + 0.05
+        x2 = DEV_ITEMS[i + 1][0] - 0.05
+        lines.append(rf"\draw[arr, draw=orange!70!black] ({x1:.3f},{DEV_Y:.3f}) -- ({x2:.3f},{DEV_Y:.3f});")
+
+    for i, (x, key, lbl) in enumerate(IOT_ITEMS):
+        icon_node(f"iot{i}", x, IOT_Y, key, lbl, "0.52cm")
+
+    for i, (x, key, lbl) in enumerate(DATA_ITEMS):
+        icon_node(f"data{i}", x, DATA_Y, key, lbl, "0.52cm")
+
+    for i, (x, key, lbl) in enumerate(REE_ITEMS):
+        icon_node(f"ree{i}", x, REE_Y, key, lbl, "0.48cm")
+
+    for i, (x, y, key, lbl) in enumerate(TEE_ITEMS):
+        icon_node(f"tee{i}", x, y, key, lbl, "0.46cm")
+
+    cloud_items = [
+        (0.14, "verify", "Attestation Verify"),
+        (0.36, "fleet", "Fleet Mgmt"),
+        (0.58, "policy", "Security Policy"),
+        (0.80, "monitor", "Monitoring"),
+    ]
+    cloud_y = 0.215
+    for i, (x, key, lbl) in enumerate(cloud_items):
+        icon_node(f"cloud{i}", x, cloud_y, key, lbl, "0.52cm")
+
+    for x1, y1, x2, y2, color, style, label in ARROWS:
+        style_name = "arr"
+        if color == "#1565C0":
+            style_name = "trust"
+        elif color == "#E65100":
+            style_name = "deploy"
+        dash = ", dashed" if style == "--" else ""
+        lines.append(
+            rf"\draw[{style_name}{dash}] ({x1:.3f},{y1:.3f}) -- ({x2:.3f},{y2:.3f});"
+        )
+        if label:
+            mx = x1 + (x2 - x1) * 0.5
+            my = y1 + (y2 - y1) * 0.5
+            lines.append(
+                rf"\node[font=\tiny, fill=white, inner sep=1pt] at ({mx:.3f},{my + 0.012:.3f}) {{{tex_escape(label)}}};"
+            )
+
+    for x, y, _fill, txt in NOTES:
+        note_lines = [tex_escape(line) for line in txt.split("\n")]
+        body = r" \\ ".join(note_lines)
+        lines.append(rf"\node[note, anchor=south west] at ({x:.3f},{y:.3f}) {{{body}}};")
+
+    lines.extend([
+        r"\node[anchor=north east, font=\tiny, text=black!60] at (0.97,0.82) {—— data flow \quad —— trusted path \quad - - deploy};",
+        r"\end{tikzpicture}",
+        r"\end{document}",
+        "",
+    ])
+
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return out_path
+
+
+def build_matplotlib(icons: dict[str, Path]) -> None:
+    fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
     fig.patch.set_facecolor("white")
 
-    ax.text(0.5, 0.975, "Trustworthy Hybrid Quantum–Classical AI for Secure IoT Edge Systems",
-            ha="center", va="top", fontsize=15, fontweight="bold")
-    ax.text(0.5, 0.948, "System Architecture — TEE-protected deployment, trusted inference, and hybrid anomaly detection",
-            ha="center", va="top", fontsize=10, color="#455A64")
+    ax.text(0.5, 0.975, TITLE, ha="center", va="top", fontsize=15, fontweight="bold")
+    ax.text(0.5, 0.948, SUBTITLE, ha="center", va="top", fontsize=10, color="#455A64")
 
-    # --- Development zone ---
-    draw_zone(ax, (0.03, 0.82), 0.94, 0.11, "#FFE0B2", "Development & Training (offline)")
-    dev_y = 0.865
-    dev_items = [
-        (0.08, "database", "Datasets"),
-        (0.22, "pytorch", "PyTorch"),
-        (0.36, "qiskit", "Qiskit"),
-        (0.50, "pennylane", "PennyLane"),
-        (0.64, "compress", "Compress"),
-        (0.78, "lock", "Sign & Encrypt"),
-    ]
-    for x, key, lbl in dev_items:
-        place_icon(ax, (x, dev_y), icons[key], lbl, zoom=0.24, label_y=-0.045)
-    for i in range(len(dev_items) - 1):
-        arrow(ax, (dev_items[i][0] + 0.05, dev_y), (dev_items[i + 1][0] - 0.05, dev_y), color="#E65100")
+    for zone in ZONES:
+        draw_zone(ax, zone["xy"], zone["w"], zone["h"], zone["fill"], zone["title"])
 
-    # --- IoT zone ---
-    draw_zone(ax, (0.03, 0.69), 0.94, 0.10, "#C8E6C9", "IoT Layer")
-    iot_y = 0.735
-    for x, key, lbl in [(0.14, "sensor", "Sensors"), (0.32, "iot", "Actuators"), (0.50, "sensor", "ESP32 nodes"), (0.72, "iot", "Field Gateway")]:
-        place_icon(ax, (x, iot_y), icons[key], lbl, zoom=0.24, label_y=-0.045)
-    arrow(ax, (0.50, 0.69), (0.50, 0.635), text="telemetry")
+    for x, key, lbl in DEV_ITEMS:
+        place_icon(ax, (x, DEV_Y), icons[key], lbl, zoom=0.24, label_y=-0.045)
+    for i in range(len(DEV_ITEMS) - 1):
+        arrow(ax, (DEV_ITEMS[i][0] + 0.05, DEV_Y), (DEV_ITEMS[i + 1][0] - 0.05, DEV_Y), color="#E65100")
 
-    # --- Edge data path ---
-    draw_zone(ax, (0.03, 0.57), 0.94, 0.10, "#ECEFF1", "Edge Data Path")
-    dp_y = 0.615
-    for x, key, lbl in [(0.22, "collect", "Data Collection"), (0.46, "feature", "Feature Extraction (REE)"), (0.70, "bench", "Benchmark Harness")]:
-        place_icon(ax, (x, dp_y), icons[key], lbl, zoom=0.24, label_y=-0.045)
-    arrow(ax, (0.27, dp_y), (0.41, dp_y), text="streams")
-    arrow(ax, (0.51, dp_y), (0.65, dp_y), text="features")
+    for x, key, lbl in IOT_ITEMS:
+        place_icon(ax, (x, IOT_Y), icons[key], lbl, zoom=0.24, label_y=-0.045)
 
-    # --- REE zone ---
-    draw_zone(ax, (0.03, 0.41), 0.44, 0.13, "#FFCDD2", "REE — Linux OS (untrusted)")
-    ree_y = 0.465
-    for x, key, lbl in [(0.10, "linux", "Linux"), (0.22, "network", "Network"), (0.34, "management", "Mgmt Agent"), (0.46, "tee_api", "TEE Client API")]:
-        place_icon(ax, (x, ree_y), icons[key], lbl, zoom=0.22, label_y=-0.048)
+    for x, key, lbl in DATA_ITEMS:
+        place_icon(ax, (x, DATA_Y), icons[key], lbl, zoom=0.24, label_y=-0.045)
 
-    # --- TEE zone ---
-    draw_zone(ax, (0.50, 0.36), 0.47, 0.18, "#BBDEFB", "TEE — OP-TEE / ARM TrustZone (protected)")
-    tee_items = [
-        (0.56, 0.505, "key", "Secure Keys"),
-        (0.68, 0.505, "model", "Model Store"),
-        (0.80, 0.505, "inference", "Inference TA"),
-        (0.92, 0.505, "hybrid", "Hybrid Q-C Engine"),
-        (0.62, 0.405, "attest", "Remote Attestation"),
-        (0.78, 0.405, "decision", "Security Decision"),
-        (0.90, 0.405, "fpga", "ARM / FPGA Runtime"),
-    ]
-    for x, y, key, lbl in tee_items:
+    for x, key, lbl in REE_ITEMS:
+        place_icon(ax, (x, REE_Y), icons[key], lbl, zoom=0.22, label_y=-0.048)
+
+    for x, y, key, lbl in TEE_ITEMS:
         place_icon(ax, (x, y), icons[key], lbl, zoom=0.21, label_y=-0.048)
 
-    arrow(ax, (0.46, ree_y), (0.56, 0.505), color="#1565C0", text="invoke TA")
-    arrow(ax, (0.65, 0.57), (0.80, 0.535), color="#37474F", text="features")
-    arrow(ax, (0.78, 0.82), (0.68, 0.535), color="#E65100", style="--", text="deploy model")
-
-    # internal TEE chain
-    arrow(ax, (0.61, 0.505), (0.63, 0.505), color="#1565C0")
-    arrow(ax, (0.73, 0.505), (0.75, 0.505), color="#1565C0")
-    arrow(ax, (0.85, 0.505), (0.87, 0.505), color="#1565C0")
-    arrow(ax, (0.92, 0.485), (0.78, 0.425), color="#1565C0")
-    arrow(ax, (0.68, 0.485), (0.62, 0.425), color="#1565C0")
-
-    # --- Cloud zone ---
-    draw_zone(ax, (0.03, 0.16), 0.94, 0.12, "#B3E5FC", "Cloud Management & Monitoring")
-    cloud_y = 0.215
-    for x, key, lbl in [(0.14, "verify", "Attestation Verify"), (0.36, "fleet", "Fleet Mgmt"), (0.58, "policy", "Security Policy"), (0.80, "monitor", "Monitoring")]:
-        place_icon(ax, (x, cloud_y), icons[key], lbl, zoom=0.24, label_y=-0.045)
-    arrow(ax, (0.78, 0.36), (0.14, 0.28), color="#1565C0", style="--", text="attestation quote")
-    arrow(ax, (0.78, 0.36), (0.80, 0.28), color="#37474F", text="alerts")
-
-    # Footer notes
-    notes = [
-        (0.03, 0.03, "#FFEBEE", "Threats mitigated:\nmodel tampering · replacement · extraction · unauthorized inference · compromised REE"),
-        (0.27, 0.03, "#E3F2FD", "TEE protects:\nmodel storage · inference · keys · decision logic"),
-        (0.51, 0.03, "#FFF8E1", "QAI role:\nanomaly engine inside TEE (not a security primitive)"),
-        (0.73, 0.03, "#E8F5E9", "RQ:\nHybrid Q-C vs TinyML for unseen attacks under deployability & TEE constraints"),
+    cloud_items = [
+        (0.14, "verify", "Attestation Verify"),
+        (0.36, "fleet", "Fleet Mgmt"),
+        (0.58, "policy", "Security Policy"),
+        (0.80, "monitor", "Monitoring"),
     ]
-    for x, y, color, txt in notes:
+    cloud_y = 0.215
+    for x, key, lbl in cloud_items:
+        place_icon(ax, (x, cloud_y), icons[key], lbl, zoom=0.24, label_y=-0.045)
+
+    for x1, y1, x2, y2, color, style, label in ARROWS:
+        arrow(ax, (x1, y1), (x2, y2), color=color, style=style, text=label)
+
+    for x, y, color, txt in NOTES:
         ax.text(x, y, txt, fontsize=8.2, va="bottom", ha="left",
                 bbox=dict(boxstyle="round,pad=0.4", facecolor=color, edgecolor="#90A4AE", alpha=0.95))
 
-    # Legend
-    ax.text(0.97, 0.82, "—— data flow    —— trusted path    - - deploy", ha="right", va="top", fontsize=8, color="#455A64")
+    ax.text(0.97, 0.82, "—— data flow    —— trusted path    - - deploy",
+            ha="right", va="top", fontsize=8, color="#455A64")
 
     fig.savefig(OUT_PNG, dpi=200, bbox_inches="tight", facecolor="white")
     fig.savefig(OUT_PDF, bbox_inches="tight", facecolor="white")
@@ -369,13 +548,45 @@ def build(icons: dict[str, Path]) -> None:
     plt.close(fig)
 
 
-def main():
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generate TEE + QAI architecture diagrams.")
+    parser.add_argument(
+        "--tex",
+        action="store_true",
+        help="Also export standalone LaTeX tikzpicture (tee_qai_edge_architecture_visual.tex).",
+    )
+    parser.add_argument(
+        "--tex-only",
+        action="store_true",
+        help="Export only the LaTeX tikzpicture (skip matplotlib PNG/PDF/SVG).",
+    )
+    parser.add_argument(
+        "--no-matplotlib",
+        action="store_true",
+        help="Skip matplotlib PNG/PDF/SVG export.",
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
     icons = ensure_icons()
-    build(icons)
+
+    export_matplotlib = not args.no_matplotlib and not args.tex_only
+    export_tex = args.tex or args.tex_only
+
+    if export_matplotlib:
+        build_matplotlib(icons)
+        print(f"Built: {OUT_PNG}")
+        print(f"Built: {OUT_PDF}")
+        print(f"Built: {OUT_SVG}")
+
+    if export_tex:
+        path = export_tikz(icons)
+        print(f"Built: {path}")
+        print("Compile: pdflatex tee_qai_edge_architecture_visual.tex")
+
     print(f"Icons: {ICON_DIR} ({len(icons)} files)")
-    print(f"Built: {OUT_PNG}")
-    print(f"Built: {OUT_PDF}")
-    print(f"Built: {OUT_SVG}")
 
 
 if __name__ == "__main__":

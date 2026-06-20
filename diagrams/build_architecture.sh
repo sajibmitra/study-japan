@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# Build system architecture diagrams (TikZ text + visual with icons)
+# Build system architecture diagrams (text-box + icon visual)
 set -euo pipefail
 cd "$(dirname "$0")"
 
+python3 generate_architecture.py --tex
+python3 generate_architecture_visual.py --tex
+
 pdflatex -interaction=nonstopmode tee_qai_edge_architecture.tex >/dev/null
-gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r450 \
-  -sOutputFile=tee_qai_edge_architecture.png tee_qai_edge_architecture.pdf >/dev/null
+pdflatex -interaction=nonstopmode tee_qai_edge_architecture_visual.tex >/dev/null 2>&1 || true
 
-python3 generate_architecture_visual.py
-
-echo "Built: tee_qai_edge_architecture.pdf / .png (TikZ)"
-echo "Built: tee_qai_edge_architecture_visual.pdf / .png / .svg (with icons)"
-echo "Icons: icons/*.png"
+echo "Built: tee_qai_edge_architecture.pdf / .png / .svg / .tex"
+echo "Built: tee_qai_edge_architecture_visual.pdf / .png / .svg / .tex"
