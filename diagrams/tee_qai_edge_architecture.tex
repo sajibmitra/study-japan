@@ -1,0 +1,170 @@
+% Complete system architecture — compile: pdflatex tee_qai_edge_architecture.tex
+\documentclass[tikz,border=10pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,arrows.meta,calc,backgrounds}
+
+\colorlet{iotc}{green!8}
+\colorlet{edgec}{gray!10}
+\colorlet{reec}{red!7}
+\colorlet{teec}{blue!8}
+\colorlet{cloudc}{cyan!8}
+\colorlet{devc}{orange!10}
+
+\tikzset{
+  every node/.style={font=\sffamily},
+  cmp/.style={
+    draw=black!65, rounded corners=3pt, line width=0.7pt,
+    fill=white, align=center, inner sep=5pt,
+    minimum height=0.72cm, font=\small
+  },
+  wide/.style={cmp, minimum width=2.35cm},
+  narrow/.style={cmp, minimum width=1.85cm},
+  zone/.style={
+    draw=black!55, rounded corners=5pt, line width=0.85pt,
+    inner sep=10pt, fill=#1
+  },
+  ztitle/.style={font=\bfseries\normalsize, text=black!80},
+  arr/.style={->, >=Latex, line width=0.85pt, draw=black!70},
+  trust/.style={->, >=Latex, line width=0.9pt, draw=blue!60!black},
+  deploy/.style={->, >=Latex, line width=0.85pt, draw=orange!70!black, dashed},
+  lbl/.style={font=\scriptsize, fill=white, inner sep=1pt, text=black!70},
+  notebox/.style={
+    draw=black!35, rounded corners=3pt, fill=white,
+    font=\scriptsize, align=left, inner sep=5pt, text width=3.15cm
+  }
+}
+
+\begin{document}
+\begin{tikzpicture}[node distance=0.38cm and 0.42cm]
+
+% ===================== ROW 0: DEVELOPMENT / TRAINING =====================
+\node[wide, fill=devc] (ds) {Public Datasets\\{\tiny NSL-KDD, Edge-IIoTset}};
+\node[wide, fill=devc, right=of ds] (pt) {PyTorch\\{\tiny classical baseline}};
+\node[wide, fill=devc, right=of pt] (qk) {Qiskit\\{\tiny sim / cloud QPU}};
+\node[wide, fill=devc, right=of qk] (pl) {PennyLane\\{\tiny VQC / kernel}};
+\node[wide, fill=devc, right=of pl] (cmp) {Compress\\\& Export};
+\node[wide, fill=devc, right=of cmp] (sign) {Sign \&\\Encrypt};
+
+\node[zone=devc, fit=(ds)(sign)] (devzone) {};
+\node[ztitle, anchor=north west] at ([xshift=3pt,yshift=-3pt]devzone.north west)
+  {Development \& Training (offline)};
+
+\draw[arr] (ds) -- (pt);
+\draw[arr] (ds) -- (qk);
+\draw[arr] (qk) -- (pl);
+\draw[arr] (pt) -- (cmp);
+\draw[arr] (pl) -- (cmp);
+\draw[arr] (cmp) -- (sign);
+
+% ===================== ROW 1: IoT LAYER =====================
+\node[wide, fill=iotc, below=1.05cm of ds, minimum width=2.8cm] (s1) {Sensors};
+\node[wide, fill=iotc, right=0.25cm of s1] (s2) {Actuators};
+\node[wide, fill=iotc, right=0.25cm of s2] (s3) {ESP32-class\\nodes};
+\node[wide, fill=iotc, right=0.25cm of s3, minimum width=3.2cm] (gwiot) {IoT Gateway\\Radio / Field bus};
+
+\node[zone=iotc, fit=(s1)(gwiot)] (iotzone) {};
+\node[ztitle, anchor=north west] at ([xshift=3pt,yshift=-3pt]iotzone.north west) {IoT Layer};
+
+% ===================== ROW 2: EDGE — DATA PATH =====================
+\node[wide, fill=edgec, below=0.85cm of s1, minimum width=3.4cm] (ingest) {Data Collection\\{\tiny ingest, buffer, parse}};
+\node[wide, fill=reec, right=0.55cm of ingest, minimum width=3.2cm] (feat) {Feature Extraction\\{\tiny REE-side preprocessing}};
+\node[wide, fill=edgec, right=0.55cm of feat, minimum width=2.8cm] (bench) {Benchmark\\Harness};
+
+\node[zone=edgec, fit=(ingest)(bench)] (datapath) {};
+\node[ztitle, anchor=north west] at ([xshift=3pt,yshift=-3pt]datapath.north west)
+  {Edge Data Path};
+
+% ===================== ROW 3: EDGE — REE vs TEE =====================
+\node[wide, fill=reec, below=0.95cm of ingest, minimum width=2.5cm] (kernel) {Linux Kernel};
+\node[wide, fill=reec, right=0.2cm of kernel] (net) {Network\\Stack};
+\node[wide, fill=reec, right=0.2cm of net] (mgmt) {Management\\Agent};
+\node[wide, fill=reec, right=0.2cm of mgmt] (teeapi) {TEE Client\\API / SMC};
+
+\node[zone=reec, fit=(kernel)(teeapi)] (reezone) {};
+\node[ztitle, anchor=north west] at ([xshift=3pt,yshift=-3pt]reezone.north west)
+  {REE — Linux OS (untrusted)};
+
+\node[wide, fill=teec, right=0.75cm of teeapi, minimum width=2.15cm] (keys) {Secure Key\\Storage};
+\node[wide, fill=teec, right=0.2cm of keys] (mstore) {Trusted AI\\Model Storage};
+\node[wide, fill=teec, right=0.2cm of mstore] (infer) {Trusted\\Inference TA};
+\node[wide, fill=teec, right=0.2cm of infer] (hybrid) {Hybrid Q--C\\Detection Engine};
+\node[wide, fill=teec, right=0.2cm of hybrid] (ra) {Remote\\Attestation};
+\node[wide, fill=teec, below=0.35cm of infer, minimum width=4.8cm] (decide) {Security Decision Logic};
+\node[wide, fill=teec, below=0.35cm of hybrid, minimum width=2.15cm] (hw) {ARM Gateway /\\FPGA SoC runtime};
+
+\node[zone=teec, fit=(keys)(ra)(decide)(hw)] (teezone) {};
+\node[ztitle, anchor=north west] at ([xshift=3pt,yshift=-3pt]teezone.north west)
+  {TEE — OP-TEE / ARM TrustZone (protected)};
+
+\node[zone=gray!8, fit=(reezone)(teezone)(datapath)] (edgezone) {};
+\node[ztitle, anchor=north west] at ([xshift=4pt,yshift=-4pt]edgezone.north west)
+  {Edge Gateway Platform};
+
+% ===================== ROW 4: CLOUD =====================
+\node[wide, fill=cloudc, below=0.95cm of kernel, minimum width=2.8cm] (verify) {Attestation\\Verifier};
+\node[wide, fill=cloudc, right=0.35cm of verify] (fleet) {Fleet\\Management};
+\node[wide, fill=cloudc, right=0.35cm of fleet] (policy) {Security\\Policy};
+\node[wide, fill=cloudc, right=0.35cm of policy] (monitor) {Monitoring\\\& Analytics};
+
+\node[zone=cloudc, fit=(verify)(monitor)] (cloudzone) {};
+\node[ztitle, anchor=north west] at ([xshift=3pt,yshift=-3pt]cloudzone.north west)
+  {Cloud Management \& Monitoring};
+
+% ===================== VERTICAL DATA FLOWS =====================
+\draw[arr] (s1.south) -- ++(0,-0.18) -| (ingest.north);
+\draw[arr] (s2.south) -- ++(0,-0.18) -| (ingest.north);
+\draw[arr] (s3.south) -- ++(0,-0.18) -| (ingest.north);
+\draw[arr] (gwiot.south) -- ++(0,-0.18) -| (ingest.north);
+
+\draw[arr] (ingest) -- node[lbl, above] {streams} (feat);
+\draw[arr] (feat.east) -- ++(0.35,0) |- node[lbl, pos=0.25, above] {features} (infer.north);
+\draw[trust] (teeapi.east) -- node[lbl, above] {invoke TA} (infer.west);
+
+\draw[trust] (keys) -- (mstore);
+\draw[trust] (mstore) -- (infer);
+\draw[trust] (infer) -- (hybrid);
+\draw[trust] (hybrid) -- (decide);
+\draw[trust] (infer.south) -- ++(0,-0.12) -| (ra.north);
+\draw[trust] (hw.north) -- (hybrid.south);
+
+\draw[arr] (decide.south) -- ++(0,-0.22) -| node[lbl, pos=0.2, below] {alerts} (monitor.north);
+\draw[trust] (ra.south) -- ++(0,-0.22) -| node[lbl, pos=0.15, below] {quote} (verify.north);
+
+% Deploy path from training
+\draw[deploy] (sign.south) -- ++(0,-0.25) -| node[lbl, pos=0.12, below] {secure model deploy} (mstore.north);
+
+% Benchmark side path
+\draw[arr, dashed] (bench.south) -- ++(0,-0.5) -| (hybrid.east);
+
+% ===================== CAPTIONS (threats, roles, RQ) =====================
+\node[notebox, fill=red!6, anchor=north west] at ([xshift=0.2cm,yshift=-0.15cm]cloudzone.south west) {
+  \textbf{Threats mitigated}\\
+  model tampering; unauthorized replacement; extraction; unauthorized inference; compromised REE
+};
+
+\node[notebox, fill=blue!6, anchor=north] at ($(cloudzone.south)!0.5!(cloudzone.south east)$) {
+  \textbf{TEE protects}\\
+  model storage, inference, keys, decision logic
+};
+
+\node[notebox, fill=yellow!12, anchor=north east] at ([xshift=-0.2cm,yshift=-0.15cm]cloudzone.south east) {
+  \textbf{QAI role}\\
+  anomaly engine inside TEE; not a security primitive
+};
+
+\node[notebox, fill=green!8, anchor=north west] at ([xshift=0.2cm,yshift=-0.15cm]devzone.south west) {
+  \textbf{RQ}\\
+  Hybrid Q--C vs.\ TinyML for zero-day / unseen attacks under deployability \& TEE constraints
+};
+
+% Legend
+\node[font=\scriptsize, anchor=north east, align=left] at ([yshift=-2pt]devzone.north east) {
+  \tikz{\draw[arr] (0,0)--(0.7,0);} data \quad
+  \tikz{\draw[trust] (0,0)--(0.7,0);} trusted \quad
+  \tikz{\draw[deploy] (0,0)--(0.7,0);} deploy
+};
+
+\end{tikzpicture}
+\end{document}
