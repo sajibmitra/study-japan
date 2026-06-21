@@ -19,6 +19,8 @@
 %
 % [2025-06-21] Fix 5 — Add prototype status line under implementation assumptions.
 %   Reason: Suzaki asked for Pi+OP-TEE evidence; figure must distinguish plan vs. demo.
+% [2025-06-21] Fix 6 — Move reviewer Q&A to separate page 2; slim diagram page 1.
+%   Reason: Suzaki questions need dedicated, readable answers; diagram page was overcrowded.
 % ---------------------------------------------------------------------------
 \documentclass[tikz,border=10pt]{standalone}
 \usepackage[T1]{fontenc}
@@ -51,7 +53,10 @@
   flowdesc/.style={font=\small, align=left, text width=0.99\linewidth, anchor=north},
   rqdesc/.style={font=\footnotesize, align=left, text width=0.99\linewidth, anchor=north},
   impldesc/.style={font=\footnotesize, align=left, text width=0.99\linewidth, anchor=north},
+  qpage/.style={anchor=north west, align=left, text width=16.8cm, inner sep=0pt, font=\small},
 }
+
+\newcommand{\qaheading}[1]{\par\vspace{8pt}{\bfseries\normalsize #1}\par\vspace{4pt}}
 
 \begin{document}
 \begin{tikzpicture}[x=18.0cm, y=11.0cm]
@@ -162,35 +167,85 @@
 \draw[deploy, dashed] (sign.south) to [in=110, out=220] node[lbl, pos=0.3, right] {secure model deploy} (mstore.north);
 \draw[arr, dashed] (bench.east) to[bend left=15] (infer.north);
 \draw[arr] (teeapi.west) to[out=180, in=150] (decide.west);
-\node[flowdesc, below=0.9cm of $(verify.south)!0.5!(monitor.south)$] (flowdesc) {%
-  \textbf{Flow and methodology:}\\[3pt]
-  \textbullet\ \textit{Phase A (offline):} train PyTorch TinyML baseline and hybrid models (Qiskit/PennyLane on simulator/cloud); compress to a \textbf{quantum-inspired C surrogate}; sign and encrypt; deploy to trusted model storage.\\[2pt]
-  \textbullet\ \textit{Phase B (online, REE):} ingest network/IIoT telemetry (flow stats, protocol fields, gateway metadata) --- \textbf{not} primary host HIDS (syscalls/file access); extract feature vector; invoke TA via libteec.\\[2pt]
-  \textbullet\ \textit{Phase B (online, TEE):} Inference TA loads sealed weights and runs \textbf{fixed-point C scoring only} (no Qiskit, no POSIX, no sockets); returns anomaly score; attestation quote optional.\\[2pt]
-  \textbullet\ \textit{Phase C (cloud):} verify attestation, fleet policy, monitoring/alerts. REE decision logic may block/log based on score --- QAI is \textbf{not an Agent AI}.%
-};
-\node[impldesc, below=0.4cm of flowdesc] (impldesc) {%
-  \textbf{Implementation assumptions (Raspberry Pi~5 + OP-TEE; targets to be measured):}\\[3pt]
-  \textbullet\ \textit{Not Agent AI:} trusted \textbf{anomaly scorer} inside a TA --- no autonomous planning, tool use, or IPS enforcement inside the secure world.\\[2pt]
-  \textbullet\ \textit{Input data:} NSL-KDD / Edge-IIoTset / Bot-IoT \textbf{network \& IIoT telemetry features} (packet/flow statistics); feature extraction in REE; TA receives a fixed-size float/int vector via \texttt{TEE\_InvokeCommand}.\\[2pt]
-  \textbullet\ \textit{Resource budgets:} REE feature extract $\leq$5--10\,ms; TA inference $\leq$10--50\,ms; end-to-end $T\leq$100\,ms; TA heap \textbf{256\,KB--1\,MB}, stack 32--64\,KB, model weights 50--200\,KB compressed (\texttt{TA\_DATA\_SIZE} in manifest).\\[2pt]
-  \textbullet\ \textit{OP-TEE feasibility:} TA uses libutee only; all network/file I/O stays in REE client; Qiskit/PennyLane never run inside TrustZone. Prototype milestone: passthrough TA $\rightarrow$ classical C inference TA $\rightarrow$ hybrid surrogate TA.\\[2pt]
-  \textbullet\ \textit{Prototype status:} architecture defined (TRL~2--3); Raspberry Pi~5 + OP-TEE passthrough TA and classical inference TA are \textbf{in progress} --- measured results to follow; full hybrid surrogate TA is a Year~2 deliverable.%
-};
-\node[rqdesc, below=0.4cm of impldesc] (rqanswers) {%
-  \textbf{Research questions:}\\[3pt]
-  \textbf{RQ1. Why is TinyML insufficient; why consider Quantum AI?}\\[1pt]
-  \textbullet\ TinyML = compressed \emph{classical} boundaries from known attacks; recall drops on \textbf{stealthy / distribution-shift} IIoT traffic (Edge-IIoTset DDoS/DoS/recon variants).\\[1pt]
-  \textbullet\ Under fixed $P$, $T$, and model size, aggressive quantization limits capacity; hybrid Q--C surrogates are a \textbf{testable alternative} benchmarked vs.\ PyTorch$\rightarrow$TFLite TinyML baseline.\\[3pt]
-  \textbf{RQ2. Roles of Quantum AI and TEE}\\[1pt]
-  \textbullet\ \textit{QAI:} anomaly \textbf{detection} engine (scoring function); \textbf{not} a security primitive; hypothesis --- better recall@FPR on unseen IIoT attacks at equal deployability; null results valid.\\[1pt]
-  \textbullet\ \textit{TEE:} hardware trust boundary --- protects keys, model storage, inference runtime, attestation; mitigates tampering, unauthorized replacement/extraction/inference, REE compromise. \textbf{QAI = detection; TEE = protection.}\\[3pt]
-  \textbf{Primary test case (QML vs.\ TinyML):} stealthy/low-rate IIoT gateway intrusions in Edge-IIoTset where equally sized TinyML autoencoder/CNN shows higher false negatives; compare recall@FPR, latency, joules/inference, TA memory.%
-};
-\node[font=\scriptsize, anchor=north east, below=0.1cm of rqanswers.south east, xshift=-0.5cm] {
+\node[font=\scriptsize, anchor=north east, below=0.9cm of monitor.south east, xshift=-0.5cm] {
   \tikz{\draw[arr] (0,0)--(0.07,0);} data \quad
   \tikz{\draw[trust] (0,0)--(0.07,0);} trusted \quad
   \tikz{\draw[deploy] (0,0)--(0.07,0);} deploy
+};
+\end{tikzpicture}
+
+%% ---------------------------------------------------------------------------
+%% Page 2 — Reviewer Q&A (implementation detail)
+%% ---------------------------------------------------------------------------
+\newpage
+\begin{tikzpicture}
+\node[qpage] (qa) at (0,0) {%
+  {\bfseries\large Implementation Detail --- Reviewer Q\&A}\\[6pt]
+  {\small\textit{Companion to system architecture figure (Page~1). Platform: Raspberry Pi~5 + OP-TEE, TRL~2--3.}}\\[10pt]
+
+  \qaheading{1.\ Tell the implementation detail of the current system architecture}
+  The architecture is a \textbf{three-phase, split-world} design:\\[3pt]
+  \textbf{Phase A --- Offline (host/cloud, not on device):}
+  Public datasets (NSL-KDD, Edge-IIoTset, Bot-IoT) are used to train a PyTorch/TinyML classical baseline and hybrid QML models (Qiskit/PennyLane on simulator or cloud QPU).
+  Models are compressed and exported as a \textbf{quantum-inspired C surrogate}, then signed and encrypted for deployment.\\[2pt]
+  \textbf{Phase B --- Online REE (Linux on Pi~5):}
+  A Client Application (CA) using \texttt{libteec} performs all POSIX I/O: network capture/ingest, parsing, feature extraction, benchmark logging, and policy actions (alert/block/log).
+  The Gateway Orchestrator coordinates the data path; the TEE Client API opens a session to the secure-world TA.\\[2pt]
+  \textbf{Phase B --- Online TEE (OP-TEE Trusted Applications):}
+  A single \textbf{Inference TA} (static C, fixed-point, \texttt{libutee} only) loads sealed model weights from Trusted Model Storage, runs scoring, and returns an anomaly score via \texttt{TEE\_InvokeCommand}.
+  Separate logical TAs for Secure Key Storage and Remote Attestation may be merged in early prototypes.
+  \textbf{Qiskit/PennyLane never run inside TrustZone.}\\[2pt]
+  \textbf{Phase C --- Cloud:}
+  Attestation Verifier checks quotes; Fleet Management and Security Policy enforce device trust; Monitoring receives alerts.\\[2pt]
+  \textbf{Invoke sequence (CA $\rightarrow$ TA):}
+  \texttt{TEEC\_InitializeContext} $\rightarrow$ \texttt{TEEC\_OpenSession} $\rightarrow$ \texttt{TEEC\_InvokeCommand(INFER, feature\_vector[N])} $\rightarrow$ score $\rightarrow$ \texttt{TEEC\_CloseSession}.
+  Feature vector size $N$ is fixed at build time (dataset-specific; e.g.\ 30--80 floats for NSL-KDD/Edge-IIoTset flows).\\[2pt]
+  \textbf{Prototype status:}
+  Architecture defined; Pi~5 + OP-TEE passthrough TA and classical C inference TA \textbf{in progress}; hybrid surrogate TA planned Year~2.
+
+  \qaheading{2.\ Do you assume the QAI works as Agent AI for IDS/IPS?}
+  \textbf{No.} QAI is \textbf{not} an Agent AI and not an autonomous IDS/IPS agent.\\[2pt]
+  It is a \textbf{trusted anomaly-scoring function} inside one Inference TA: input = fixed feature vector, output = numeric score (+ optional attestation evidence).\\[2pt]
+  \textbf{IDS-like:} yes --- the REE Decision Logic converts scores into alerts sent to cloud monitoring.\\
+  \textbf{IPS-like:} only if REE policy explicitly blocks or quarantines traffic based on the score --- this enforcement runs in Linux (REE), not inside the TA.\\
+  There is no autonomous planning, tool use, LLM reasoning, or self-directed action loop in the secure world.
+
+  \qaheading{3.\ What data is used by the QAI (detection engine)?}
+  The detection engine receives a \textbf{pre-computed feature vector} produced in the REE --- not raw packets and not host audit logs.\\[2pt]
+  Data sources align with public IoT security benchmark datasets:\\[2pt]
+  \textbullet\ \textbf{NSL-KDD / Bot-IoT:} network flow statistics (duration, protocol, bytes, flags, service type).\\
+  \textbullet\ \textbf{Edge-IIoTset:} IIoT gateway telemetry --- packet/header fields, protocol anomalies, sensor/gateway metadata aggregated into flow windows.\\[2pt]
+  The REE Data Collection and Feature Extraction stages parse telemetry and normalize values into a fixed-size vector passed to the TA.
+
+  \qaheading{4.\ File access, system calls, network traffic --- which apply?}
+  \begin{tabular}{@{}p{3.2cm}p{2.0cm}p{10.2cm}@{}}
+    \textbf{Data source} & \textbf{Used?} & \textbf{Role in current architecture} \\
+    \hline
+    Network traffic   & \textbf{Yes (primary)} & Captured/parsed in REE; flow stats fed to feature extractor and then to TA. \\
+    System calls      & No (out of scope)     & Not collected; host HIDS is not the target use case. \\
+    File access       & No (out of scope)     & Not collected; may be added later as optional REE features, not in TA. \\
+  \end{tabular}\\[4pt]
+  \textit{Scope: gateway-level IIoT/network anomaly detection, not endpoint host intrusion detection.}
+
+  \qaheading{5.\ How much CPU and memory overhead do you assume?}
+  All values are \textbf{measurement targets} on Raspberry Pi~5 (to be validated by the benchmark harness):\\[4pt]
+  \begin{tabular}{@{}p{4.5cm}p{11.5cm}@{}}
+    \hline
+    \textbf{Metric} & \textbf{Assumed target} \\
+    \hline
+    REE feature extraction latency & $\leq$ 5--10\,ms per scoring window \\
+    TA inference latency           & $\leq$ 10--50\,ms per \texttt{InvokeCommand} \\
+    End-to-end latency ($T$)       & $\leq$ 100\,ms (ingest $\rightarrow$ alert) \\
+    REE CPU (steady state)         & $\leq$ 10--15\% of one Cortex-A76 core at $\sim$100 flows/s \\
+    TA CPU during inference        & Burst only during \texttt{InvokeCommand}; no background loop in secure world \\
+    REE RAM (CA + features)        & $\leq$ 32--64\,MB working set for gateway daemon \\
+    TA heap (\texttt{TA\_DATA\_SIZE}) & 256\,KB--1\,MB (Pi OP-TEE manifest) \\
+    TA stack                       & 32--64\,KB \\
+    Sealed model weights in TA     & 50--200\,KB compressed surrogate \\
+    Power budget ($P$)             & Measured via USB power meter / PMIC; reported as joules/inference \\
+    \hline
+  \end{tabular}\\[4pt]
+  TinyML baseline (PyTorch $\rightarrow$ TFLite in REE or small C TA) is the reference point; hybrid QML must match or beat it on recall@FPR \textbf{within these budgets}, or we report that QML is not justified.%
 };
 \end{tikzpicture}
 \end{document}
