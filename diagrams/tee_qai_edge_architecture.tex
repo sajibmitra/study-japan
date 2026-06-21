@@ -200,9 +200,7 @@
   \textbf{Invoke sequence (CA $\rightarrow$ TA):}
   \texttt{TEEC\_InitializeContext} $\rightarrow$ \texttt{TEEC\_OpenSession} $\rightarrow$ \texttt{TEEC\_InvokeCommand(INFER, feature\_vector[N])} $\rightarrow$ score $\rightarrow$ \texttt{TEEC\_CloseSession}.
   Feature vector size $N$ is fixed at build time (dataset-specific; e.g.\ 30--80 floats for NSL-KDD/Edge-IIoTset flows).\\[2pt]
-  \textbf{Prototype status:}
-  Architecture defined; Pi~5 + OP-TEE passthrough TA and classical C inference TA \textbf{in progress}; hybrid surrogate TA planned Year~2.
-
+  
   \qaheading{2.\ Do you assume the QAI works as Agent AI for IDS/IPS?}
   \textbf{No.} QAI is \textbf{not} an Agent AI and not an autonomous IDS/IPS agent.\\[2pt]
   It is a \textbf{trusted anomaly-scoring function} inside one Inference TA: input = fixed feature vector, output = numeric score (+ optional attestation evidence).\\[2pt]
