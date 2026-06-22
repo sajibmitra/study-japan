@@ -21,11 +21,25 @@
 %   Reason: Suzaki asked for Pi+OP-TEE evidence; figure must distinguish plan vs. demo.
 % [2025-06-21] Fix 6 — Move reviewer Q&A to separate page 2; slim diagram page 1.
 %   Reason: Suzaki questions need dedicated, readable answers; diagram page was overcrowded.
+%
+% [2025-06-21] Fix 7 — Revise Q5 CPU/memory budgets from real-scenario analysis.
+%   Reason: Prior table mixed peak latency with sustained throughput (e.g.\ 100 flows/s
+%   at 60\,ms each is infeasible); budgets now tied to defined gateway workload, OP-TEE
+%   TA pool limits (RPi3 ref.\ 16\,MB TA RAM), and measurable Pi~5 baselines.
+%
+% [2025-06-21] Fix 8 — Add inline citations (Page 2--3) and References page (Page 4).
+%   Reason: CPU load vs.\ scoring rate comparative study and all budget metrics must
+%   trace to published TinyML, OP-TEE, dataset, QML, and MLPerf standards.
+%
+% [2025-06-21] Fix 9 — Q3 security-feature comparison table (TinyML vs.\ TinyML-in-TA vs.\ Hybrid-in-TA).
+%   Reason: Reviewer Q3 covers detection data; security posture of the three pipelines
+%   belongs here; cost/latency metrics remain in Q5 and baseline comparison PDF.
 % ---------------------------------------------------------------------------
 \documentclass[tikz,border=10pt]{standalone}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{xcolor}
+\usepackage{url}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,calc,positioning,fit}
 
@@ -85,13 +99,13 @@
 \node[anchor=north west, font=\bfseries\small] at (-0.1,0.232) {Cloud Management \& Monitoring};
 \definecolor{fillds}{HTML}{FFE0B2}
 
-\node[cmp, fill=fillds, minimum width=2.34cm] (ds) at (0.03, 1) {Public Datasets\\{\tiny NSL-KDD, Edge-IIoTset}};
+\node[cmp, fill=fillds, minimum width=2.34cm] (ds) at (0.01, 1) {Public Datasets\\{\tiny NSL-KDD [4], Edge-IIoTset [5]}};
 \definecolor{fillpt}{HTML}{FFE0B2}
 \node[cmp, fill=fillpt, minimum width=2.34cm, right= 1cm of ds] (pt) {PyTorch\\{\tiny classical baseline}};
 \definecolor{fillqk}{HTML}{FFE0B2}
 \node[cmp, fill=fillqk, minimum width=2.34cm, right= 1cm of pt] (qk) {Qiskit\\{\tiny sim / cloud QPU}};
 \definecolor{fillpl}{HTML}{FFE0B2}
-\node[cmp, fill=fillpl, minimum width=2.34cm, right= 1cm of qk] (pl) {PennyLane\\{\tiny VQC / kernel}};
+\node[cmp, fill=fillpl, minimum width=2.34cm, right= 1cm of qk] (pl) {PennyLane [10]\\{\tiny VQC / kernel}};
 \node[lbl, below=0.05cm of qk.south, xshift=1.1cm] {offline only --- not deployed to TEE};
 \definecolor{fillcmp}{HTML}{FFE0B2}
 \node[cmp, fill=fillcmp, minimum width=2.34cm, right= 1cm of pl] (cmp) {Compress \& Export};
@@ -181,12 +195,12 @@
 \begin{tikzpicture}
 \node[qpage] (qa) at (0,0) {%
   {\bfseries\large Implementation Detail --- Reviewer Q\&A}\\[6pt]
-  {\small\textit{Companion to system architecture figure (Page~1). Platform: Raspberry Pi~5 + OP-TEE, TRL~2--3.}}\\[10pt]
+  {\small\textit{Companion to system architecture figure (Page~1). Platform: Raspberry Pi~5 + OP-TEE [6--8], TRL~2--3. See Page~4 for full reference list.}}\\[10pt]
 
   \qaheading{1.\ Tell the implementation detail of the current system architecture}
   The architecture is a \textbf{three-phase, split-world} design:\\[3pt]
   \textbf{Phase A --- Offline (host/cloud, not on device):}
-  Public datasets (NSL-KDD, Edge-IIoTset, Bot-IoT) are used to train a PyTorch/TinyML classical baseline and hybrid QML models (Qiskit/PennyLane on simulator or cloud QPU).
+  Public datasets (NSL-KDD [4], Edge-IIoTset [5], Bot-IoT) are used to train a PyTorch/TinyML classical baseline [1][2] and hybrid QML models (Qiskit/PennyLane [10] on simulator or cloud QPU; IoT QML prior art [9][11]).
   Models are compressed and exported as a \textbf{quantum-inspired C surrogate}, then signed and encrypted for deployment.\\[2pt]
   \textbf{Phase B --- Online REE (Linux on Pi~5):}
   A Client Application (CA) using \texttt{libteec} performs all POSIX I/O: network capture/ingest, parsing, feature extraction, benchmark logging, and policy actions (alert/block/log).
@@ -200,7 +214,9 @@
   \textbf{Invoke sequence (CA $\rightarrow$ TA):}
   \texttt{TEEC\_InitializeContext} $\rightarrow$ \texttt{TEEC\_OpenSession} $\rightarrow$ \texttt{TEEC\_InvokeCommand(INFER, feature\_vector[N])} $\rightarrow$ score $\rightarrow$ \texttt{TEEC\_CloseSession}.
   Feature vector size $N$ is fixed at build time (dataset-specific; e.g.\ 30--80 floats for NSL-KDD/Edge-IIoTset flows).\\[2pt]
-  
+  \textbf{Prototype status:}
+  Architecture defined (TRL~2--3); Pi~5 + OP-TEE passthrough TA and classical C inference TA \textbf{in progress}; hybrid surrogate TA is a Year~2 deliverable. All latency/CPU/RAM figures in Q5 are \textbf{engineering targets} pending benchmark validation.
+
   \qaheading{2.\ Do you assume the QAI works as Agent AI for IDS/IPS?}
   \textbf{No.} QAI is \textbf{not} an Agent AI and not an autonomous IDS/IPS agent.\\[2pt]
   It is a \textbf{trusted anomaly-scoring function} inside one Inference TA: input = fixed feature vector, output = numeric score (+ optional attestation evidence).\\[2pt]
@@ -211,39 +227,163 @@
   \qaheading{3.\ What data is used by the QAI (detection engine)?}
   The detection engine receives a \textbf{pre-computed feature vector} produced in the REE --- not raw packets and not host audit logs.\\[2pt]
   Data sources align with public IoT security benchmark datasets:\\[2pt]
-  \textbullet\ \textbf{NSL-KDD / Bot-IoT:} network flow statistics (duration, protocol, bytes, flags, service type).\\
-  \textbullet\ \textbf{Edge-IIoTset:} IIoT gateway telemetry --- packet/header fields, protocol anomalies, sensor/gateway metadata aggregated into flow windows.\\[2pt]
-  The REE Data Collection and Feature Extraction stages parse telemetry and normalize values into a fixed-size vector passed to the TA.
+  \textbullet\ \textbf{NSL-KDD [4] / Bot-IoT:} network flow statistics (duration, protocol, bytes, flags, service type).\\
+  \textbullet\ \textbf{Edge-IIoTset [5]:} IIoT gateway telemetry --- packet/header fields, protocol anomalies, sensor/gateway metadata aggregated into flow windows.\\[2pt]
+  The REE Data Collection and Feature Extraction stages parse telemetry and normalize values into a fixed-size vector passed to the TA.\\[6pt]
+  {\bfseries Security features by pipeline} {\scriptsize (cost/latency in Q5)}\\[4pt]
+  {\footnotesize
+  \begin{tabular}{@{}p{3.0cm}p{3.7cm}p{3.7cm}p{4.2cm}@{}}
+    \hline
+    \textbf{Security property} & \textbf{TinyML (REE)} & \textbf{TinyML-in-TA} & \textbf{Hybrid-in-TA} \\
+    \hline
+    Model storage           & REE filesystem (plain)     & TEE sealed store [6]       & Same as TinyML-in-TA \\
+    Model integrity         & Not protected              & Signed + sealed weights    & Same as TinyML-in-TA \\
+    Weight / IP confidentiality & Readable by REE processes & TZDRAM; not exposed to REE & Same as TinyML-in-TA \\
+    Inference execution     & Untrusted Linux userspace  & Isolated OP-TEE TA [7][8]  & Same as TinyML-in-TA \\
+    Secure deployment       & Plain file copy            & Sign \& encrypt before load  & Same as TinyML-in-TA \\
+    Remote attestation      & Not available              & TA quote to cloud verifier & Same as TinyML-in-TA \\
+    Score provenance        & Untrusted REE output       & TA score via \texttt{InvokeCommand} & Same as TinyML-in-TA \\
+    Policy / alert actions  & REE Decision Logic         & REE Decision Logic         & REE Decision Logic \\
+    Runtime tamper resistance & Low (replace \texttt{.tflite}) & High (static C TA)     & Same as TinyML-in-TA \\
+    Detection engine        & Classical TinyML scorer    & Classical scorer in TA     & Hybrid Q--C surrogate [9] \\
+    \hline
+  \end{tabular}}\\[4pt]
+  {\small \textbf{Note:} TinyML-in-TA and Hybrid-in-TA share the same TEE security boundary [6--8]; Hybrid-in-TA differs only in \emph{what} is sealed (quantum-inspired surrogate weights), not \emph{how} it is protected. Feature vectors are still prepared in the untrusted REE before TA invoke.}
 
   \qaheading{4.\ File access, system calls, network traffic --- which apply?}
-  \begin{tabular}{@{}p{3.2cm}p{2.0cm}p{10.2cm}@{}}
+  \begin{tabular}{@{}p{2.3cm}p{2.8cm}p{11cm}@{}}
     \textbf{Data source} & \textbf{Used?} & \textbf{Role in current architecture} \\
     \hline
     Network traffic   & \textbf{Yes (primary)} & Captured/parsed in REE; flow stats fed to feature extractor and then to TA. \\
     System calls      & No (out of scope)     & Not collected; host HIDS is not the target use case. \\
     File access       & No (out of scope)     & Not collected; may be added later as optional REE features, not in TA. \\
   \end{tabular}\\[4pt]
-  \textit{Scope: gateway-level IIoT/network anomaly detection, not endpoint host intrusion detection.}
+  \textit{Scope: gateway-level IIoT/network anomaly detection, not endpoint host intrusion detection.}%
+};
+\end{tikzpicture}
 
-  \qaheading{5.\ How much CPU and memory overhead do you assume?}
-  All values are \textbf{measurement targets} on Raspberry Pi~5 (to be validated by the benchmark harness):\\[4pt]
-  \begin{tabular}{@{}p{4.5cm}p{11.5cm}@{}}
+%% ---------------------------------------------------------------------------
+%% Page 3 — Q5: CPU & memory budget (real-scenario analysis)
+%% ---------------------------------------------------------------------------
+\newpage
+\begin{tikzpicture}
+\node[qpage, font=\footnotesize] (q5) at (0,0) {%
+  {\bfseries\large Q5.\ CPU and memory overhead --- real-scenario budget analysis}\\[4pt]
+  {\small\textit{Platform: Raspberry Pi~5 (BCM2712, 4$\times$Cortex-A76 @ 2.4\,GHz, 4--8\,GB DDR4). OP-TEE on Pi~5 requires patched TF-A/kernel (community port; no hardware secure RAM --- TZDRAM carved from DDR) [6][7]. Reference: RPi3 OP-TEE layout reserves \textbf{16\,MB TA RAM pool} + 4\,MB TEE core (see OP-TEE \texttt{plat-rpi3/platform\_config.h} [6]); Pi~5 port uses similar carve-out near 1\,GB boundary. Cost metrics follow PICO TinyML benchmark [3] and MLPerf power guidance [13].}}\\[8pt]
+
+  \qaheading{Reference deployment scenario (what the budget models)}
+  \textbullet\ \textbf{Benchmark / replay mode:} pre-extracted flow records from NSL-KDD ($N{=}41$) [4] or Edge-IIoTset ($N{\approx}63$) [5] fed to the gateway at \textbf{5--20 scoring events/s} (not per-packet line rate).\\
+  \textbullet\ \textbf{Live gateway mode:} new flow summaries arrive every \textbf{1--10\,s} per active flow (typical IIoT gateway aggregation [5]); target $\leq$20 sustained scoring events/s on one core.\\
+  \textbullet\ \textbf{Model class:} small int8 MLP / quantum-inspired surrogate (${\sim}$5--30\,K parameters) [1][2]; \textbf{not} full MobileNet-scale vision models.\\
+  \textbullet\ \textbf{Important:} a 60\,ms pipeline at 100 events/s would need ${\sim}$6 cores --- prior ``100 flows/s @ 10--15\% CPU'' was inconsistent; budgets below use \textbf{sustained event rate} $\times$ \textbf{per-event cost}.
+
+  \qaheading{Latency breakdown (per scoring event, ms)}
+  \begin{tabular}{@{}lrrrp{6.8cm}@{}}
     \hline
-    \textbf{Metric} & \textbf{Assumed target} \\
+    \textbf{Stage} & \textbf{Typ.} & \textbf{Max} & \textbf{Where} & \textbf{Basis / notes} \\
     \hline
-    REE feature extraction latency & $\leq$ 5--10\,ms per scoring window \\
-    TA inference latency           & $\leq$ 10--50\,ms per \texttt{InvokeCommand} \\
-    End-to-end latency ($T$)       & $\leq$ 100\,ms (ingest $\rightarrow$ alert) \\
-    REE CPU (steady state)         & $\leq$ 10--15\% of one Cortex-A76 core at $\sim$100 flows/s \\
-    TA CPU during inference        & Burst only during \texttt{InvokeCommand}; no background loop in secure world \\
-    REE RAM (CA + features)        & $\leq$ 32--64\,MB working set for gateway daemon \\
-    TA heap (\texttt{TA\_DATA\_SIZE}) & 256\,KB--1\,MB (Pi OP-TEE manifest) \\
-    TA stack                       & 32--64\,KB \\
-    Sealed model weights in TA     & 50--200\,KB compressed surrogate \\
-    Power budget ($P$)             & Measured via USB power meter / PMIC; reported as joules/inference \\
+    Flow parse + feature norm   & 0.5 & 3  & REE (C)  & Fixed-size vector; no deep packet inspection \\
+    \texttt{TEEC\_OpenSession}  & 0.1 & 1  & SMC      & Amortized if session kept open \\
+    World switch + \texttt{InvokeCommand} & 0.5 & 3  & REE$\leftrightarrow$TEE & OP-TEE SMC overhead [6][8] \\
+    TA inference (TinyML int8 MLP) & 1 & 8  & TEE TA   & ${\sim}$5--30\,K MACs; fixed-point C [1] \\
+    TA inference (hybrid surrogate) & 3 & 25 & TEE TA   & Larger surrogate; qubit depth capped [9][12] \\
+    REE decision + alert          & 0.2 & 2  & REE      & Threshold / policy lookup \\
     \hline
-  \end{tabular}\\[4pt]
-  TinyML baseline (PyTorch $\rightarrow$ TFLite in REE or small C TA) is the reference point; hybrid QML must match or beat it on recall@FPR \textbf{within these budgets}, or we report that QML is not justified.%
+    \textbf{End-to-end (session open)} & \textbf{2} & \textbf{15} & --- & TinyML-in-TA target \\
+    \textbf{End-to-end (session open)} & \textbf{5} & \textbf{35} & --- & Hybrid-in-TA target \\
+    \textbf{End-to-end (cold session)} & \textbf{5} & \textbf{40} & --- & Includes open/close; alert path \\
+    \hline
+  \end{tabular}\\[2pt]
+  {\small Service objective: $T\leq$\,100\,ms ingest$\rightarrow$alert retains margin for network/cloud [5]; \textbf{not} inline 10\,Gbps IPS. Latency measured via \texttt{clock\_gettime} per PICO [3].}
+
+  \qaheading{Memory map (realistic allocation)}
+  \begin{tabular}{@{}p{4.0cm}p{3.2cm}p{8.8cm}@{}}
+    \hline
+    \textbf{Region} & \textbf{Size (target)} & \textbf{Justification} \\
+    \hline
+    REE CA (C + libteec)       & 4--12\,MB RSS   & Minimal daemon; no Python on production path \\
+    REE benchmark harness (dev) & 32--64\,MB RSS  & Python/PyTorch logging during Year~1 only \\
+    Feature + I/O buffers (REE) & ${\sim}N\times4$\,B + ring buffer & $N{=}41$--63 $\Rightarrow$ $<$1\,KB vector; capture buffer 1--4\,MB \\
+    OP-TEE shared memory (NS)  & 2--4\,MB        & RPi3 default 4\,MB SHM; holds invoke buffers \\
+    TEE core (OP-TEE OS)       & ${\sim}$4\,MB     & Code + \texttt{CFG\_CORE\_HEAP\_SIZE} (platform) \\
+    TA RAM pool (all TAs)      & ${\sim}$8--16\,MB & RPi3 reference; Pi~5 port similar order \\
+    \texttt{TA\_STACK\_SIZE}   & 8--16\,KB       & OP-TEE TA properties [6][7]; examples use 2\,KB [8] \\
+    \texttt{TA\_DATA\_SIZE}    & 256--512\,KB    & Per-TA heap in manifest [6]; default 32\,KB is \textbf{too small} for weights \\
+    Sealed model weights       & 10--80\,KB      & int8 MLP (${\sim}$5--30\,K params) [1][2]; up to ${\sim}$200\,KB upper bound \\
+    Working activations (TA)   & 4--32\,KB       & Fixed-point scratch; no dynamic alloc in steady state \\
+    \hline
+  \end{tabular}\\[2pt]
+  {\small \textbf{Constraint:} each TA declares \texttt{TA\_DATA\_SIZE}+\texttt{TA\_STACK\_SIZE}+binary image at load; memory is \textbf{per-TA reserved}, not shared. Early prototype merges key storage + inference + attestation into one TA to stay within pool.}
+
+  \qaheading{CPU load vs.\ scoring rate (sustainability check) {\scriptsize [1--3,6,8]}}
+  {\small\textit{Three-pipeline comparative study; duty-cycle metric per PICO [3].}}\\[4pt]
+  \begin{tabular}{@{}p{5.5cm}cccp{5.0cm}@{}}
+    \hline
+    \textbf{Configuration} & \textbf{ms/event} & \textbf{@ 5/s} & \textbf{@ 20/s} & \textbf{1 core duty cycle / ref.} \\
+    \hline
+    TinyML in REE (TFLite int8)     & ${\sim}$2  & ${\sim}$1\%  & ${\sim}$4\%  & Baseline [1][3]; no TEE overhead \\
+    TinyML in TA (same model)       & ${\sim}$8  & ${\sim}$4\%  & ${\sim}$16\% & +SMC [6][8]; session kept open \\
+    Hybrid surrogate in TA        & ${\sim}$20 & ${\sim}$10\% & ${\sim}$40\% & Surrogate path [9][12]; cap size if $>$20/s \\
+    \hline
+  \end{tabular}\\[2pt]
+  {\small Formula: duty cycle $\approx$ (\texttt{ms/event} $\times$ events/s) / 1000 [3]. Accept criterion: TEE-wrapped TinyML $\leq$4$\times$ REE latency [3][6]. At 20 events/s the hybrid TA path uses ${\sim}$40\% of one A76 core --- acceptable for a dedicated gateway; remaining cores handle networking and OS.}
+
+  \qaheading{Power / energy (order-of-magnitude, to be metered) {\scriptsize [13]}}
+  Pi~5 gateway under load: ${\sim}$3.5--6\,W typical (excluding attached radios). At 8\,ms/event and 5 events/s: ${\sim}$40\,ms CPU/s $\Rightarrow$ average ${\sim}$0.3--0.5\,W incremental $\Rightarrow$ \textbf{${\sim}$8--15\,mJ per scored flow} (USB power meter; MLPerf power methodology [13]).\\[6pt]
+  \textbf{Comparison rule:} PyTorch$\rightarrow$TFLite TinyML \emph{in REE} is the accuracy/speed reference [1][2]; \emph{TEE-wrapped} TinyML must stay within ${\sim}$2--4$\,$times latency of REE-only [3][6]; hybrid QML must beat TinyML on recall@FPR [5][9] \textbf{within the hybrid row budget} or we report QML is not justified. \textbf{All cells above are pre-measurement targets} --- the benchmark harness will log \texttt{clock\_gettime} [3], \texttt{/proc/self/status} RSS [3], and TA heap usage via test commands [6][7].%
+};
+\end{tikzpicture}
+
+%% ---------------------------------------------------------------------------
+%% Page 4 — References and cost-metric standards
+%% ---------------------------------------------------------------------------
+\newpage
+\begin{tikzpicture}
+\node[qpage, font=\scriptsize] at (0,0) {%
+  {\bfseries\large References and cost-metric standards}\\[6pt]
+  {\small\textit{Numbering matches inline citations on Pages~1--3.}}\\[6pt]
+
+  \qaheading{Comparative study mapping (CPU load vs.\ scoring rate, Page~3)}
+  \textbf{Row 1 --- TinyML in REE:} TFLite Micro runtime [1], TinyML workflow [2], PICO latency/CPU/memory metrics [3].\\
+  \textbf{Row 2 --- TinyML in TA:} same model export as Row~1 [1][2]; OP-TEE world switch + \texttt{TEE\_InvokeCommand} overhead [6][7][8].\\
+  \textbf{Row 3 --- Hybrid surrogate in TA:} offline QML training [9][10][11]; C surrogate deployability gap [12]; same TEE invoke path as Row~2 [6][8].\\
+  \textbf{Datasets \& detection quality:} NSL-KDD [4], Edge-IIoTset [5] (recall@FPR, family hold-out for unseen IIoT attacks).\\
+  \textbf{Energy reporting:} MLPerf power measurement [13].\\[8pt]
+
+  \qaheading{Standard cost and evaluation metrics (this study)}
+  \begin{tabular}{@{}p{3.2cm}p{5.5cm}p{7.3cm}@{}}
+    \hline
+    \textbf{Metric} & \textbf{Definition / target} & \textbf{Standard / reference} \\
+    \hline
+    Inference latency   & Wall-clock ms per scoring event (session open) & PICO TinyML benchmark [3]; \texttt{clock\_gettime} \\
+    End-to-end latency  & Ingest $\rightarrow$ alert; target $\leq$100\,ms & Edge IDS SLA practice [5] \\
+    CPU duty cycle      & (\texttt{ms/event} $\times$ rate) / 1000 on one core & PICO CPU utilization [3]; Page~3 sustainability table \\
+    REE RSS memory      & CA + buffers (MB) & \texttt{/proc/self/status}; PICO memory efficiency [3] \\
+    TA heap / stack     & \texttt{TA\_DATA\_SIZE}, \texttt{TA\_STACK\_SIZE} & OP-TEE TA properties [6][7] \\
+    Model size          & Sealed int8 weights (KB) & TinyML compression [1][2] \\
+    Energy / inference  & Joules or mJ per scored flow & MLPerf power methodology [13] \\
+    Detection quality   & Recall@FPR (e.g.\ 1\%), AUC, F1 & Edge-IIoTset IDS evaluation [5]; QML IoT prior art [9] \\
+    Trust overhead      & TEE vs REE latency ratio ($\leq$4$\times$ target) & PICO stability [3]; OP-TEE SMC + TA invoke [6][8] \\
+    \hline
+  \end{tabular}\\[10pt]
+
+  \qaheading{Reference list}
+  \begin{enumerate}
+    \setlength{\itemsep}{2pt}
+    \item R.~David \textit{et al.}, ``TensorFlow Lite Micro: Embedded Machine Learning on TinyML Systems,'' \textit{Proc.\ MLSys}, 2021. \textit{(TFLite Micro / REE inference baseline.)}
+    \item P.~Warden and D.~Situnayake, \textit{TinyML: Machine Learning with TensorFlow Lite on Arduino and Ultra-Low-Power Microcontrollers}. O'Reilly, 2019. \textit{(Train, quantize, deploy workflow.)}
+    \item A.~Dey, S.~Srivastava, G.~Singh, and R.~G.~Pettit, ``Real-Time Performance Benchmarking of TinyML Models in Embedded Systems (PICO),'' arXiv:2509.04721, 2025. \textit{(Latency, CPU duty cycle, memory, stability --- Page~3 comparative study.)}
+    \item M.~Tavallaee, E.~Bagheri, W.~Lu, and A.~A.~Ghorbani, ``A Detailed Analysis of the KDD CUP 99 Data Set,'' \textit{Proc.\ IEEE CISDA}, 2009. DOI: 10.1109/CISDA.2009.5356528. \textit{(NSL-KDD dataset.)}
+    \item M.~A.~Ferrag \textit{et al.}, ``Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications,'' \textit{IEEE Access}, vol.~10, pp.~40281--40306, 2022. DOI: 10.1109/ACCESS.2022.3165809. \textit{(Primary IIoT IDS dataset; recall@FPR evaluation.)}
+    \item OP-TEE Documentation, ``Trusted Applications,'' OP-TEE v4.x. \url{https://optee.readthedocs.io/en/latest/building/trusted_applications.html}. \textit{(\texttt{TA\_DATA\_SIZE}, \texttt{TA\_STACK\_SIZE}; Pi~3/5 TA pool.)}
+    \item OP-TEE Documentation, ``Trusted Applications Architecture,'' OP-TEE v4.x. \url{https://optee.readthedocs.io/en/latest/architecture/trusted_applications.html}. \textit{(TEE Internal Core API, \texttt{TEE\_InvokeCommand}.)}
+    \item Linaro SWG, ``TA Properties Basics,'' \textit{optee\_examples} docs. \url{https://github.com/linaro-swg/optee_examples}. \textit{(Passthrough / inference TA; \texttt{libteec} client.)}
+    \item S.~Chowdhury \textit{et al.}, ``Quantum Machine Learning for Anomaly Detection in IoT Devices,'' \textit{Proc.\ AIMLSystems (Quantum Symposium)}, 2025. \textit{(QML-for-IoT-IDS prior art; hybrid surrogate hypothesis.)}
+    \item V.~Bergholm \textit{et al.}, ``PennyLane: Automatic differentiation of hybrid quantum-classical computation,'' \textit{Advances in Quantum Technologies}, 2022. \textit{(Hybrid training toolchain --- offline only.)}
+    \item F.~D'Amore \textit{et al.}, ``Projected Quantum Kernel for IoT Data Analysis,'' \textit{Proc.\ IEEE PICom}, pp.~200--204, 2024. DOI: 10.1109/PICom64201.2024.00032. \textit{(Quantum-kernel IoT classification baseline.)}
+    \item A.~Dey and K.~Raza, ``Embedded Quantum Machine Learning: Feasibility and Hybrid Architectures,'' 2026. \textit{(Edge QML deployability evidence gap cited in doctoral survey.)}
+    \item MLCommons, ``MLPerf Inference Benchmark Rules,'' v4.x; ``MLPerf Power Measurement,'' MLCommons, 2023--2024. \url{https://mlcommons.org/en/inference/}. \textit{(Joules/inference and standardized power reporting.)}
+  \end{enumerate}%
 };
 \end{tikzpicture}
 \end{document}

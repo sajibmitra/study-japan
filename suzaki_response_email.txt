@@ -1,0 +1,31 @@
+Dear Professor Suzaki,
+
+Thank you for your follow-up. Please find attached tee_qai_edge_architecture.pdf with brief answers below.
+
+1. Implementation detail
+   Three-phase design: offline train/export → Pi REE (I/O, features) + OP-TEE Inference TA (static C scoring) → cloud attestation/monitoring. Details on Page 2.
+
+2. Agent AI for IDS/IPS?
+   No. QAI is a trusted scoring function in the TA, not an autonomous agent. Alerts/policy run in REE.
+
+3. What data? (file / syscall / network)
+   Pre-computed feature vectors from network/IIoT flow stats (NSL-KDD, Edge-IIoTset). Network: yes (REE). Syscalls/files: no (out of scope).
+
+4. CPU and memory overhead
+   Page 3: budgets at 5–20 events/s — latency, TA_DATA_SIZE (256–512 KB), memory map, CPU duty cycle for TinyML / TinyML-in-TA / Hybrid-in-TA. Targets pending measurement.
+
+5. OP-TEE without POSIX / TA size
+   Qiskit/PennyLane never in TEE. Only libutee C inference TA; POSIX stays in REE. TA heap/stack and pool limits on Pages 2–3.
+
+6. Pi prototype reality
+   TRL 2–3: OP-TEE passthrough + classical inference TA in progress; hybrid TA Year 2. Stated honestly in the attachment.
+
+7. QML advantage over TinyML
+   Specific test: recall@FPR on held-out stealthy IIoT attacks (Edge-IIoTset) vs same-size TinyML-in-TA. Null result if no gain within hybrid budget.
+
+Happy to discuss further or share early benchmark logs.
+
+Best regards,
+[Your name]
+
+Attachment: diagrams/tee_qai_edge_architecture.pdf
